@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+data/
+# Keep the extracted model (models/buffalo_l/*.onnx) in the build context, but not the zip.
+models/*.zip
+models/_extract/

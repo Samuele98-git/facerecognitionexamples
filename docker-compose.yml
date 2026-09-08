@@ -1,0 +1,50 @@
+# Brings up PostgreSQL + the recognition backend with one command:
+#   docker compose up --build
+# The dashboard (frontend) runs separately with npm — see README.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: face
+      POSTGRES_PASSWORD: face
+      POSTGRES_DB: faceaccess
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U face"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://face:face@db:5432/faceaccess
+      USE_GPU: "false"
+      RECOGNITION_THRESHOLD: "0.45"
+      # Detector input size. 320 is ~4x faster on CPU than the 640 default and is plenty
+      # for a close-up webcam face; raise it if faces farther from the camera get missed.
+      DET_SIZE: "320"
+      PROCESS_FPS: "6"
+      LOG_UNKNOWN: "true"
+      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+      UPLOAD_DIR: /data/uploads
+      SNAPSHOT_DIR: /data/snapshots
+      # First-run admin login. Only applied on the very first boot (empty users
+      # table); change it afterward in the UI under Settings > Users.
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: password
+    ports:
+      - "8000:8000"
+    volumes:
+      - media:/data                 # enrollment photos + event snapshots
+      # The face model is baked into the image (see Dockerfile) — no volume, no download.
+
+volumes:
+  pgdata:
+  media:

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# App data (photos, snapshots, sqlite db) — never commit biometric data
+data/
+backend/data/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Datasets & the large face model (fetched with scripts/fetch_model — never commit)
+ml/datasets/
+backend/models/buffalo_l/
+backend/models/*.zip
+backend/models/_extract/
+# The small anti-spoof ONNX models (backend/models/antispoof/, ~3.6MB) ARE committed so
+# the offline build works from a fresh clone. See scripts/liveness/ for how they're made.
+
+# Env / secrets
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
